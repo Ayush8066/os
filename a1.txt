@@ -1,0 +1,54 @@
+#include<iostream>
+#include<unistd.h>
+#include<bits/stdc++.h>
+#include<sys/wait.h>
+using namespace std;
+
+int main(int argc, char* argv[]){
+    int pid = fork();
+
+
+    if(pid < 0){
+        cout << "Fork unsuccessful" << endl;
+
+        exit(0);
+
+    }
+
+    else if(pid == 0){
+        cout << "Fork successfull" << endl;
+        
+        cout << "Child Process Completed: " << getpid() << endl;
+
+
+        if(strcmp(argv[1], "ls") == 0){
+            cout << "-----ls command executed successfully-----" << endl;
+            execlp("/bin/ls", "ls", NULL);
+            
+        }
+
+        else if(strcmp(argv[1], "grep") == 0) {
+            cout << "-----grep executed successfully-----" << endl;
+            execlp("/bin/grep", "grep", argv[2], argv[3], argv[4], NULL);
+            
+
+        }
+
+        else if(strcmp(argv[1], "cp") == 0){
+            cout << "-----cp executed successfully-----" << endl;
+            execlp("/bin/cp",  "cp", argv[2], argv[3], NULL);
+            
+        }
+        
+    }
+
+    else{
+        wait(NULL);
+        cout << "Parent process completed" << endl;
+        cout << getpid();
+    }
+
+
+    return 0;
+}
+
