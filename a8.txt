@@ -1,0 +1,193 @@
+Fcfs :-
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+int main() {
+    int n; // start position
+    cout << "Enter the start position: ";
+    cin >> n;
+
+    int m; // number of locations
+    cout << "Enter the number of locations: ";
+    cin >> m;
+
+    int loc[m]; // array to store locations
+    cout << "Enter " << m << " locations:\n";
+    for (int i = 0; i < m; ++i) {
+        cout << "Location " << i + 1 << ": ";
+        cin >> loc[i];
+    }
+
+    int t = 0;
+    for (int i = 0; i < m; i++) {
+        t = t + abs(loc[i] - n);
+        cout << "|" << n << "-" << loc[i] << "|" << endl;
+        n = loc[i];
+    }
+
+    cout << "Total overhead is : " << t << endl;
+
+    return 0;
+}
+
+//OUTPUT:-
+Input:
+Request sequence = {176, 79, 34, 60, 92, 11, 41, 114}
+Initial head position = 50
+
+
+
+
+
+
+SSTF:-
+#include<iostream>
+#include<cmath>
+#include<limits.h>
+using namespace std;
+
+int main() {
+    int n; // start position
+    cout << "Enter the start position: ";
+    cin >> n;
+
+    int size; // size of the location array
+    cout << "Enter the number of locations: ";
+    cin >> size;
+
+    int loc[size]; // array to store locations
+    cout << "Enter " << size << " locations:\n";
+    for (int i = 0; i < size; ++i) {
+        cout << "Location " << i + 1 << ": ";
+        cin >> loc[i];
+    }
+
+    int flag[size] = {0}; // array to mark visited locations
+    int t = 0; // total overhead
+
+    for (int i = 0; i < size; i++) {
+        int min = INT_MAX;
+        int index;
+        for (int j = 0; j < size; j++) {
+            if (flag[j] == 0 && abs(loc[j] - n) < min) {
+                index = j;
+                min = abs(loc[j] - n);
+            }
+        }
+        cout << loc[index] << " is targeted " << endl;
+        t += abs(loc[index] - n);
+        n = loc[index];
+        flag[index] = 1;
+    }
+
+    cout << "Total overhead is : " << t << endl;
+
+    return 0;
+}
+
+
+
+//Scan
+
+#include<iostream>
+#include<cmath>
+#include<algorithm>
+#include<limits.h>
+using namespace std;
+int main()
+{
+int n=50;//start position
+int loc[] = {82,170,43,140,24,16,190};
+int size = sizeof(loc)/sizeof(int);
+int flag[sizeof(loc)/sizeof(int)]={0};
+int t=0;
+for(int i=0;i<size-1;i++)
+{
+for(int j=i;j<size;j++)
+{
+if(loc[i]>loc[j])
+{
+swap(loc[i],loc[j]);
+}
+}
+}
+for(int i:loc)cout<<i<<" ";
+if(n<loc[0])
+{
+t = loc[size-1]-n;
+}
+else if(n<loc[size-1])
+{
+int q;
+cout<<"Press 1 if You want to move larger values first\n Press 2 if you want to move
+to lower value first : ";
+cin>>q;
+if(q==1)
+{
+t = (loc[size-1]-n) + (loc[size-1]-loc[0]);
+}
+else if (q==2)
+{
+t = (loc[0]-n) + (loc[size-1]-loc[0]);
+}
+}
+else
+{
+t = loc[0] - n;
+}
+cout<<"Total overhead is : "<<t<<endl;
+}
+
+//C-Scan
+
+#include<iostream>
+#include<cmath>
+#include<algorithm>
+#include<limits.h>
+using namespace std;
+int main()
+{
+int n=50;//start position
+int loc[] = {82,170,43,140,24,16,190};
+int size = sizeof(loc)/sizeof(int);
+int flag[sizeof(loc)/sizeof(int)]={0};
+int t=0;
+for(int i=0;i<size-1;i++)
+{
+for(int j=i;j<size;j++)
+{
+if(loc[i]>loc[j])
+{
+swap(loc[i],loc[j]);
+}
+}
+}
+for(int i:loc)cout<<i<<" ";
+if(n<loc[0])
+{
+t = loc[size-1]-n;
+}
+else if(n<loc[size-1])
+{
+int q;
+cout<<"Press 1 if You want to move larger values first\n Press 2 if you want to move
+to lower value first : ";
+cin>>q;
+if(q==1)
+{
+t = (loc[size-1]-n) + (loc[size-1]-loc[0]);
+}
+else if (q==2)
+{
+t = (loc[0]-n) + (loc[size-1]-loc[0]);
+}
+}
+else
+{
+t = loc[0] - n;
+}
+cout<<"Total overhead is : "<<t<<endl;
+}
+
+
