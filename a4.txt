@@ -1,0 +1,95 @@
+#include <iostream>
+#include <cstdlib>
+#include <string>
+
+using namespace std;
+struct CustomSemaphore {
+  int lock;
+  int readerCount;
+  int waitingReaders;
+  bool isWriting;
+};
+void addReader(CustomSemaphore & semaphore) {
+  if (semaphore.lock == 0 &&
+    semaphore.readerCount == 0) {
+    cout << "\nSorry, File is currently being written.\nNew reader added to the waiting list.\n";
+    semaphore.waitingReaders++;
+  } else {
+    cout << "\nReader process added.\n";
+    semaphore.readerCount++;
+    semaphore.lock--;
+  }
+}
+void addWriter(CustomSemaphore &
+  semaphore) {
+  if (semaphore.lock == 1) {
+    semaphore.lock--;
+    semaphore.isWriting = true;
+    cout << "\nWriter process added.\n";
+  } else if (semaphore.isWriting)
+    cout << "\nSorry, Writer is currently active.\n";
+  else
+    cout << "\nSorry, File is currently being read.\n";
+}
+void removeReader(CustomSemaphore &
+  semaphore) {
+  if (semaphore.readerCount == 0)
+    cout << "\nNo readers to remove.\n";
+  else {
+    cout << "\nReader removed.\n";
+    semaphore.readerCount--;
+    semaphore.lock++;
+  }
+}
+void removeWriter(CustomSemaphore & semaphore) {
+  if (!semaphore.isWriting)
+    cout << "\nNo writer to remove.\n";
+  else {
+    cout << "\nWriter removed.\n";
+    semaphore.lock++;
+    semaphore.isWriting = false;
+    if (semaphore.waitingReaders != 0) {
+      semaphore.lock -= semaphore.waitingReaders;
+      semaphore.readerCount = semaphore.waitingReaders;
+      semaphore.waitingReaders = 0;
+      cout << semaphore.readerCount << "waiting readers added.\n";
+    }
+  }
+}
+int main() {
+  CustomSemaphore customSemaphore = {
+    1,
+    0,
+    0,
+    false
+  };
+  while (true) {
+    // system("cls");
+    cout << "Options:\n1. Add Reader\n2. Add Writer\n3. Remove Reader\n4. Remove Writer\n5. Exit\n\nChoice: ";
+    int choice;
+    cin >> choice;
+    switch (choice) {
+    case 1:
+      addReader(customSemaphore);
+      break;
+    case 2:
+      addWriter(customSemaphore);
+      break;
+    case 3:
+      removeReader(customSemaphore);
+      break;
+    case 4:
+      removeWriter(customSemaphore);
+      break;
+    case 5:
+      cout << "\nExiting...\n" << endl;
+      return 0;
+    default:
+      cout << "\nInvalid Entry!";
+      continue;
+    }
+    cout << "\n\n<<<<<< Current Status >>>>>>\n\n\tLock\t\t:\t" << customSemaphore.lock << "\n\tActive Readers\t:\t" << customSemaphore.readerCount << "\n\tWaiting Readers\t:\t" << customSemaphore.waitingReaders << "\n\tWriter Active\t:\t" << ((customSemaphore.lock == 0 && customSemaphore.readerCount == 0) ? "YES" : "NO") << "\n\n";
+    // system("pause");
+  }
+}
+
