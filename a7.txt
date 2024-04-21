@@ -1,0 +1,111 @@
+#include <bits/stdc++.h>
+using namespace std;
+int isPresent(vector<int> frame, int num){
+for(int i=0;i<frame.size();i++){
+if(frame[i]==num){
+return i;
+}
+}
+return -1;
+}
+void FCFS(vector <int> frame, int fSize, vector<int> pgSeq){
+int ptr=0;
+int pgFaults=0;
+for(int i=0;i<pgSeq.size();i++){
+if(isPresent(frame, pgSeq[i]) == -1){
+frame[ptr]=pgSeq[i];
+++ptr;
+pgFaults++;
+}
+if(ptr==fSize){
+ptr=0;
+}
+}
+cout<<"\n\tPage faults: "<<pgFaults<<endl;
+}
+void LRU(vector <int> frame, int fSize, vector<int> pgSeq){
+int pgFaults=0;
+vector <int> vec;
+for(int i=0;i<pgSeq.size();i++){
+vec.push_back(pgSeq[i]);
+if(isPresent(frame, pgSeq[i]) == -1){
+if(vec.size()<=fSize){
+frame[i]=pgSeq[i];
+}
+else{
+int n=vec[0];
+vec.erase(vec.begin());
+int repIdx=isPresent(frame, n);
+frame[repIdx]=pgSeq[i];
+}
+pgFaults++;
+}
+else{
+for(auto it=vec.begin(); it!=vec.end();it++){
+if(*it==pgSeq[i]){
+vec.erase(it);
+
+break;
+
+}
+}
+}
+}
+cout<<"\n\tPage faults: "<<pgFaults<<endl;
+}
+void OR(vector <int> frame, int fSize, vector<int> pgSeq){
+unordered_map <int, int> cmap;
+int pgFaults=0;
+for(int i=0;i<pgSeq.size();i++){
+if(i<fSize){
+frame[i]=pgSeq[i];
+pgFaults++;
+}
+else if (i >= fSize && isPresent(frame, pgSeq[i]) == -1) {
+
+int farthest = -1;
+int replace = -1;
+for (int j = 0; j < fSize; j++) {
+int nextOccu = INT_MAX;
+for (int k = i + 1; k < pgSeq.size(); k++) {
+if (frame[j] == pgSeq[k]) {
+nextOccu = k;
+break;
+
+}
+}
+if (nextOccu > farthest) {
+farthest = nextOccu;
+
+replace = j;
+
+}
+}
+frame[replace] = pgSeq[i];
+pgFaults++;
+}
+}
+cout<<"\n\tPage faults: "<<pgFaults<<endl;
+}
+int main(){
+int fSize;
+cout<<"Frame size: ";
+cin>>fSize;
+vector <int> frame(fSize, -1);
+int pgNum;
+cout<<"No of pages: ";
+cin>>pgNum;
+vector <int> pgSeq(pgNum, 0);
+cout<<"Page sequence: ";
+for(int i=0;i<pgNum; i++){
+cin>>pgSeq[i];
+}
+cout<<"\nPage replacement using FCFS: "<<endl;
+FCFS(frame, fSize, pgSeq);
+cout<<"\nPage replacement using LRU: "<<endl;
+LRU(frame, fSize, pgSeq);
+cout<<"\nPage replacement using Optimum replacement: "<<endl;
+OR(frame, fSize, pgSeq);
+return 0;
+}
+1, 3, 0, 3, 5, 6, 3 with 3 page frame
