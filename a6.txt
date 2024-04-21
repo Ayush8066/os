@@ -1,0 +1,273 @@
+First Fit:
+#include <iostream>
+using namespace std;
+
+void firstFit(int blockSize[], int m, int processSize[], int n);
+void printfun(int visited[], int n, int processSize[]);
+
+int main() {
+    int m, n;
+    cout << "Enter the number of memory blocks: ";
+    cin >> m;
+    cout << "Enter the number of processes: ";
+    cin >> n;
+
+    int blockSize[m];
+    int processSize[n];
+
+    cout << "Enter memory block sizes:" << endl;
+    for (int i = 0; i < m; ++i) {
+        cout << "Block " << i + 1 << ": ";
+        cin >> blockSize[i];
+    }
+
+    cout << "Enter process sizes:" << endl;
+    for (int i = 0; i < n; ++i) {
+        cout << "Process " << i + 1 << ": ";
+        cin >> processSize[i];
+    }
+
+    firstFit(blockSize, m, processSize, n);
+    return 0;
+}
+
+void firstFit(int blockSize[], int m, int processSize[], int n) {
+    int visited[n];
+    for (int i = 0; i < n; i++) {
+        visited[i] = -1;
+    }
+
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < m; i++) {
+            if (blockSize[i] >= processSize[j]) {
+                visited[j] = i + 1;
+                blockSize[i] -= processSize[j];
+                break;
+            }
+        }
+    }
+    printfun(visited, n, processSize);
+}
+
+void printfun(int visited[], int n, int processSize[]) {
+    cout << "\nProcess No.\tProcess Size\tBlock no.\n";
+    for (int i = 0; i < n; i++) {
+        if (visited[i] == -1) {
+            cout << i + 1 << "\t\t" << processSize[i] << "\t\t"
+                 << "Not allocated\n";
+        } else
+            cout << i + 1 << "\t\t" << processSize[i] << "\t\t" << visited[i] << "\n";
+    }
+}
+Next Fit:
+#include <iostream>
+using namespace std;
+
+void nextFit(int blockSize[], int m, int processSize[], int n);
+void printfun(int visited[] , int n, int processSize[]);
+
+int main() {
+    int m, n;
+    cout << "Enter the number of memory blocks: ";
+    cin >> m;
+    cout << "Enter the number of processes: ";
+    cin >> n;
+
+    int blockSize[m];
+    int processSize[n];
+
+    cout << "Enter memory block sizes:" << endl;
+    for (int i = 0; i < m; ++i) {
+        cout << "Block " << i + 1 << ": ";
+        cin >> blockSize[i];
+    }
+
+    cout << "Enter process sizes:" << endl;
+    for (int i = 0; i < n; ++i) {
+        cout << "Process " << i + 1 << ": ";
+        cin >> processSize[i];
+    }
+
+    nextFit(blockSize, m, processSize, n);
+    return 0;
+}
+
+void nextFit(int blockSize[], int m, int processSize[], int n) {
+    int last_allocated = 0;
+    int visited[n];
+    for (int i = 0; i < n; i++) {
+        visited[i] = -1;
+    }
+
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < m; i++) {
+            if (blockSize[last_allocated] >= processSize[j]) {
+                visited[j] = last_allocated + 1;
+                blockSize[last_allocated] -= processSize[j];
+                break;
+            }
+            last_allocated = (last_allocated + 1) % m;
+        }
+    }
+    printfun(visited, n, processSize);
+}
+
+void printfun(int visited[] , int n, int processSize[]){
+    cout<<"\nProcess No.\tProcess Size\tBlock no.\n";
+    for(int i=0;i<n;i++){
+        if(visited[i]==-1){
+            cout<<i+1<<"\t\t"<<processSize[i]<<"\t\t"<<"Not allocated\n";
+        }
+        else
+            cout<<i+1<<"\t\t"<<processSize[i]<<"\t\t"<<visited[i]<<"\n";
+    }
+}
+Best Fit:
+#include <iostream>
+using namespace std;
+
+void bestFit(int blockSize[], int m, int processSize[], int n);
+void printfun(int visited[], int n, int processSize[]);
+
+int main() {
+    int m, n;
+    cout << "Enter the number of memory blocks: ";
+    cin >> m;
+    cout << "Enter the number of processes: ";
+    cin >> n;
+
+    int blockSize[m];
+    int processSize[n];
+
+    cout << "Enter memory block sizes:" << endl;
+    for (int i = 0; i < m; ++i) {
+        cout << "Block " << i + 1 << ": ";
+        cin >> blockSize[i];
+    }
+
+    cout << "Enter process sizes:" << endl;
+    for (int i = 0; i < n; ++i) {
+        cout << "Process " << i + 1 << ": ";
+        cin >> processSize[i];
+    }
+
+    bestFit(blockSize, m, processSize, n);
+    return 0;
+}
+
+void bestFit(int blockSize[], int m, int processSize[], int n) {
+    int visited[n];
+    for (int i = 0; i < n; i++) {
+        visited[i] = -1;
+    }
+
+    for (int j = 0; j < n; j++) {
+        int mini = INT_MAX;
+        for (int i = 0; i < m; i++) {
+            if (blockSize[i] >= processSize[j]) {
+                if (mini > blockSize[i]) {
+                    mini = blockSize[i];
+                    visited[j] = i;
+                }
+            }
+        }
+        if (mini != INT_MAX) {
+            blockSize[visited[j]] -= processSize[j];
+        }
+    }
+    printfun(visited, n, processSize);
+}
+
+void printfun(int visited[], int n, int processSize[]) {
+    cout << "\nProcess No.\tProcess Size\tBlock no.\n";
+    for (int i = 0; i < n; i++) {
+        if (visited[i] == -1) {
+            cout << i + 1 << "\t\t" << processSize[i] << "\t\t"
+                 << "Not allocated\n";
+        } else
+            cout << i + 1 << "\t\t" << processSize[i] << "\t\t" << visited[i] + 1 <<
+            "\n";
+    }
+}
+
+Worst Fit:
+#include <iostream>
+using namespace std;
+
+void worstFit(int blockSize[], int m, int processSize[], int n);
+void printfun(int visited[], int n, int processSize[]);
+
+int main() {
+    int m, n;
+    cout << "Enter the number of memory blocks: ";
+    cin >> m;
+    cout << "Enter the number of processes: ";
+    cin >> n;
+
+    int blockSize[m];
+    int processSize[n];
+
+    cout << "Enter memory block sizes:" << endl;
+    for (int i = 0; i < m; ++i) {
+        cout << "Block " << i + 1 << ": ";
+        cin >> blockSize[i];
+    }
+
+    cout << "Enter process sizes:" << endl;
+    for (int i = 0; i < n; ++i) {
+        cout << "Process " << i + 1 << ": ";
+        cin >> processSize[i];
+    }
+
+    worstFit(blockSize, m, processSize, n);
+    return 0;
+}
+
+void worstFit(int blockSize[], int m, int processSize[], int n) {
+    int visited[n];
+    for (int i = 0; i < n; i++) {
+        visited[i] = -1;
+    }
+
+    for (int j = 0; j < n; j++) {
+        int max = INT_MIN;
+        for (int i = 0; i < m; i++) {
+            if (blockSize[i] >= processSize[j]) {
+                if (max < blockSize[i]) {
+                    max = blockSize[i];
+                    visited[j] = i;
+                }
+            }
+        }
+        if (max != INT_MIN) {
+            blockSize[visited[j]] -= processSize[j];
+        }
+    }
+    printfun(visited, n, processSize);
+}
+
+void printfun(int visited[], int n, int processSize[]) {
+    cout << "\nProcess No.\tProcess Size\tBlock no.\n";
+    for (int i = 0; i < n; i++) {
+        if (visited[i] == -1) {
+            cout << i + 1 << "\t\t" << processSize[i] << "\t\t"
+                 << "Not allocated\n";
+        } else
+            cout << i + 1 << "\t\t" << processSize[i] << "\t\t" << visited[i] + 1 <<
+            "\n";
+    }
+}
+OUTPUT:-
+Enter the number of memory blocks: 5
+Enter the number of processes: 4
+Enter memory block sizes:
+Block 1: 100
+Block 2: 500
+Block 3: 200
+Block 4: 300
+Block 5: 600
+Enter process sizes:
+Process 1: 212
+Process 2: 417
+Process 3: 112
+Process 4: 426
