@@ -1,0 +1,257 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+
+using namespace std;
+//Structure to store process
+struct Process {
+int id;
+int AT;
+int BT;
+int priority;
+int rT;
+};
+
+bool sortByAT(const Process &a, const Process &b) {
+return a.AT < b.AT;
+}
+
+bool sortByPriority(const Process &a, const Process &b) {
+return a.priority < b.priority;
+}
+
+void calculateCT(vector<Process> &processes, vector<int> &CT) {
+CT[0] = processes[0].BT;
+for (int i = 1; i < processes.size(); ++i) {
+CT[i] = CT[i - 1] + processes[i].BT;
+}
+}
+
+void calculateTAT(vector<Process> &processes, vector<int> &CT, vector<int> &TAT) {
+for (int i = 0; i < processes.size(); ++i) {
+TAT[i] = CT[i] - processes[i].AT;
+}
+}
+
+void calculateWT(vector<Process> &processes, vector<int> &WT, vector<int> &TAT) {
+for (int i = 0; i < processes.size(); ++i) {
+WT[i] = TAT[i] - processes[i].BT;
+}
+}
+
+void displayTable(vector<Process> &processes, vector<int> &CT, vector<int> &TAT, vector<int> &WT) {
+cout << "job\tArrival-Time\tBrust-Time\tPriority\tCompletion-Time\tTurnaround-Time\tWaiting-Time\n";
+
+float avgTAT = 0, avgWT = 0;
+for (int i = 0; i < processes.size(); ++i) {
+cout << processes[i].id << "\t\t" << processes[i].AT << "\t\t" << processes[i].BT << "\t\t";
+if (processes[i].priority != -1)
+cout << processes[i].priority << "\t\t";
+else
+cout << "NA\t\t";
+cout << CT[i] << "\t\t" << TAT[i] << "\t\t" << WT[i] << endl;
+avgTAT += TAT[i];
+avgWT += WT[i];
+}
+avgTAT /= processes.size();
+avgWT /= processes.size();
+
+cout << "avg tat: " << avgTAT << endl;
+cout << "avg wt: " << avgWT << endl;
+}
+
+void firstComeFirstServe(vector<Process> processes) {
+sort(processes.begin(), processes.end(), sortByAT);
+
+vector<int> CT(processes.size());
+calculateCT(processes, CT);
+
+vector<int> TAT(processes.size());
+calculateTAT(processes, CT, TAT);
+
+vector<int> WT(processes.size());
+
+calculateWT(processes, WT, TAT);
+
+cout << "First come first serve:\n";
+displayTable(processes, CT, TAT, WT);
+}
+
+void shortestJobFirst(vector<Process> processes, bool preemptive) {
+vector<Process> processesCopy = processes;
+
+sort(processesCopy.begin(), processesCopy.end(), sortByAT);
+vector<int> CT(processesCopy.size(), 0);
+vector<int> TAT(processesCopy.size(), 0);
+vector<int> WT(processesCopy.size(), 0);
+vector<bool> done(processesCopy.size(), false);
+int time = 0;
+int completed = 0;
+while (completed < processesCopy.size()) {
+int shortestJob = -1;
+
+int shortestTime = INT_MAX;
+for (int i = 0; i < processesCopy.size(); ++i) {
+if (!done[i] && processesCopy[i].AT <= time && processesCopy[i].BT < shortestTime) {
+shortestTime = processesCopy[i].BT;
+shortestJob = i;
+}
+}
+
+if (shortestJob == -1) {
+++time;
+continue;
+}
+if (preemptive) {
+--processesCopy[shortestJob].BT;
+++time;
+if (processesCopy[shortestJob].BT == 0) {
+CT[shortestJob] = time;
+done[shortestJob] = true;
+++completed;
+
+}
+} else {
+time += processesCopy[shortestJob].BT;
+CT[shortestJob] = time;
+done[shortestJob] = true;
+++completed;
+}
+}
+calculateTAT(processes, CT, TAT);
+calculateWT(processes, WT, TAT);
+if (preemptive)
+cout << "Pre-emptive SJF:\n";
+else
+cout << "Non pre-emptive SJF:\n";
+displayTable(processes, CT, TAT, WT);
+}
+
+void roundRobin(vector<Process> processes, int quantum) {
+sort(processes.begin(), processes.end(), sortByAT);
+vector<int> CT(processes.size(), 0);
+vector<int> TAT(processes.size(), 0);
+vector<int> WT(processes.size(), 0);
+int time = 0;
+int idx = 0;
+while (true) {
+bool allDone = true;
+for (int i = 0; i < processes.size(); ++i) {
+if (processes[i].rT > 0) {
+allDone = false;
+if (processes[i].rT > quantum) {
+time += quantum;
+processes[i].rT -= quantum;
+} else {
+time += processes[i].rT;
+processes[i].rT = 0;
+CT[i] = time;
+}
+}
+
+}
+if (allDone)
+break;
+
+}
+calculateTAT(processes, CT, TAT);
+calculateWT(processes, WT, TAT);
+cout << "Round Robin:\n";
+displayTable(processes, CT, TAT, WT);
+}
+
+void priorityScheduling(vector<Process> processes) {
+vector<Process> processesCopy = processes;
+sort(processesCopy.begin(), processesCopy.end(), sortByPriority);
+vector<int> CT(processesCopy.size(), 0);
+vector<int> TAT(processesCopy.size(), 0);
+vector<int> WT(processesCopy.size(), 0);
+int time = 0;
+int idx = 0;
+while (!processesCopy.empty()) {
+if (processesCopy[idx].AT <= time) {
+int selected = processesCopy[idx].id;
+int burst = processesCopy[idx].BT;
+CT[selected - 1] = time + burst;
+TAT[selected - 1] = CT[selected - 1] - processesCopy[idx].AT;
+WT[selected - 1] = TAT[selected - 1] - processesCopy[idx].BT;
+time += burst;
+processesCopy.erase(processesCopy.begin() + idx);
+idx = 0;
+continue;
+} else {
+if (idx == processesCopy.size() - 1) {
+time++;
+idx=0;
+} else {
+idx++;
+}
+}
+
+}
+cout << "Priority:\n";
+displayTable(processes, CT, TAT, WT); // Pass processesCopy here
+}
+
+int main() {
+int n;
+cout << "Enter no. of jobs: ";
+cin >> n;
+vector<Process> processes(n); //Vector to store the Structure Objects
+cout << "Enter Arrival-Time, Brust-Time and Priority for jobs:\n";
+for (int i = 0; i < n; ++i) {
+processes[i].id = i + 1;
+cin >> processes[i].AT >> processes[i].BT >> processes[i].priority;
+processes[i].rT = processes[i].BT;
+}
+int choice;
+do {
+cout << "\n1. First Come First Served (FCFS) \n"
+<< "2. Shortest Job First (Non pre-emptive)\n"
+<< "3. Shortest Job First (pre-emptive)\n"
+<< "4. Round Robin Scheduling\n"
+<< "5. Priority Scheduling\n"
+<< "6. Exit\n\n";
+
+cin >> choice;
+switch (choice) {
+case 1:
+firstComeFirstServe(processes);
+break;
+
+case 2:
+shortestJobFirst(processes, false);
+break;
+case 3:
+shortestJobFirst(processes, true);
+break;
+case 4:
+
+int quantum;
+cout << "Enter time quantum for Round Robin: ";
+cin >> quantum;
+roundRobin(processes, quantum);
+break;
+case 5:
+priorityScheduling(processes);
+break;
+case 6:
+return 0;
+default:
+cout << "Invalid choice!\n";
+}
+} while (1);
+
+return 0;
+}
+
+
+
+Output:-
+Enter no. of jobs: 4
+Enter Arrival-Time, Brust-Time and Priority for jobs:
+0 7 0
+1 5 0
+2 3 0
+3 7 0
